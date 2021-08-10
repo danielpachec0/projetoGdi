@@ -1,7 +1,7 @@
 --DROP TABLES-------------------------------------------------------------
 DROP TABLE tb_agendamento
 /
-DROP TABLE Vacina
+DROP TABLE tb_vacina
 /
 DROP TABLE tb_funcionario
 /
@@ -22,6 +22,10 @@ DROP TYPE tp_paciente
 /
 DROP TYPE tp_pessoa
 /
+DROP TYPE tp_ponto_de_vacinacao
+/
+DROP TYPE tp_arr_telefone
+/
 DROP TYPE tp_telefone
 /
 DROP TYPE tp_campanha_de_vacinacao
@@ -29,7 +33,7 @@ DROP TYPE tp_campanha_de_vacinacao
 DROP TYPE tp_plano_de_saude
 /
 DROP TYPE tp_endereco
-
+/
 -- TIPOS ---------------------------------------------------------
 
 --endereco
@@ -38,7 +42,8 @@ CREATE OR REPLACE TYPE tp_endereco AS OBJECT(
     rua VARCHAR(100),
     bairro VARCHAR(100),
     cidade VARCHAR(100),
-    estado VARCHAR(100)
+    estado VARCHAR(100),
+    numero NUMBER
 );
 
 /
@@ -53,9 +58,11 @@ CREATE OR REPLACE TYPE tp_plano_de_saude AS OBJECT(
 
 --telefone
 CREATE OR REPLACE TYPE tp_telefone AS OBJECT(
-    ????
+    numero VARCHAR(100)
 );
 
+/
+CREATE OR REPLACE TYPE tp_arr_telefone AS VARRAY(5) OF tp_telefone;
 /
 
 --pessoa
@@ -66,7 +73,7 @@ CREATE OR REPLACE TYPE tp_pessoa AS OBJECT(
     dt_nascimento DATE,
     sexo char(1),
     endereco tp_endereco,
-    --tlefone tp_telefone
+    telefones tp_arr_telefone
 )NOT FINAL;
 
 /
@@ -75,7 +82,7 @@ CREATE OR REPLACE TYPE tp_pessoa AS OBJECT(
 CREATE OR REPLACE TYPE tp_ponto_de_vacinacao AS OBJECT(
     CNPJ VARCHAR(100),
     endereco tp_endereco,
-    telefone tp_telefone
+    telefones tp_arr_telefone
 );
 
 /
@@ -83,21 +90,26 @@ CREATE OR REPLACE TYPE tp_ponto_de_vacinacao AS OBJECT(
 --funcionario
 CREATE OR REPLACE TYPE tp_funcionario UNDER tp_pessoa(
     salario NUMBER
+    --adcionar referencia ponto
+    --adcionar ref supervisor
 );
+
+/
 
 --paciente
 CREATE OR REPLACE TYPE tp_paciente UNDER tp_pessoa(
     plano_de_saude tp_plano_de_saude,
+    dt_cadastro DATE
 );
 
 /
 
 --vacina
 CREATE OR REPLACE TYPE tp_vacina AS OBJECT(
-    lote  varchar(100),
-    ponto REF tp_ponto_de_vacinacao,
-    validade DATE,
-    nome
+    lote VARCHAR(100),
+    -- ponto REF tp_ponto_de_vacinacao,
+    validade DATE
+    nome VARCHAR(100),
     quantidade NUMBER
 );
 
@@ -105,7 +117,7 @@ CREATE OR REPLACE TYPE tp_vacina AS OBJECT(
 
 --campanha de vacinacao
 CREATE OR REPLACE TYPE tp_campanha_de_vacinacao AS OBJECT(
-    --id
+    id NUMBER,
     nome  varchar(100),
     entidade varchar(100),
     dt_inicio DATE,
@@ -115,29 +127,33 @@ CREATE OR REPLACE TYPE tp_campanha_de_vacinacao AS OBJECT(
 /
 
 --agendamento
-CREATE OR REPLACE TYPE tp_campanha_de_vacinacao AS OBJECT(
-    id INTEGER;
-    paciente REF tp_paciente,
-    funcionario REF tp_funcionario,
-    ponto REF tp_ponto_de_vacinacao, --checar se precisa
-    vacina REF vacina,
+CREATE OR REPLACE TYPE tp_agendamento AS OBJECT(
+    id INTEGER,
+    --paciente REF tp_paciente,
+    --funcionario REF tp_funcionario,
+    --ponto REF tp_ponto_de_vacinacao, --checar se precisa
+    --vacina REF vacina,
     dt_agendamento TIMESTAMP,
     status CHAR(1)
 );
 
+/
+
 --agendamento com campanha
-CREATE OR REPLACE TYPE tp_campanha_de_vacinacao AS OBJECT(
-    id INTEGER;
-    paciente REF tp_paciente,
-    funcionario REF tp_funcionario,
-    ponto REF tp_ponto_de_vacinacao, --checar se precisa
-    vacina REF vacina,
-    dt_agendamento TIMESTAMP,
-    status CHAR(1),
-    campanha REF tp_campanha_de_vacinacao
+CREATE OR REPLACE TYPE tp_agendamento_com_campanha, AS OBJECT(
+    
 );
 
+/
+
 -- TABELAS ---------------------------------------------------------
+
+--Ponto de vacinacao
+CREATE TABLE tb_ponto_de_vacinacao OF tp_ponto_de_vacinacao(
+    CNPJ PRIMARY KEY
+);
+
+;
 
 --Funcionario
 CREATE TABLE tb_funcionario OF tp_funcionario(
@@ -149,4 +165,24 @@ CREATE TABLE tb_funcionario OF tp_funcionario(
 --paciente
 CREATE TABLE tb_paciente OF tp_paciente(
     CPF PRIMARY KEY
+);
+
+--campanha
+
+CREATE TABLE tb_campanha_de_vacinacao OF tp_campanha_de_vacinacao(
+    nome PRIMARY KEY
+);
+
+/
+
+--Vacina
+CREATE TABLE tb_vacina OF tp_vacina(
+    lote PRIMARY KEY
+);
+
+/
+
+--agendamento
+CREATE TABLE tb_agendamento OF tp_agendamento(
+    id PRIMARY KEY
 );
