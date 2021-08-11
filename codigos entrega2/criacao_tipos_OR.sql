@@ -128,8 +128,21 @@ CREATE OR REPLACE TYPE tp_vacina AS OBJECT(
     ponto REF tp_ponto_de_vacinacao,
     validade DATE,
     nome VARCHAR(100),
-    quantidade NUMBER
+    quantidade NUMBER,
+    MAP MEMBER FUNCTION compara_quantidade_vacina return NUMBER
 );
+/
+CREATE OR REPLACE TYPE BODY tp_vacina AS   
+    MAP MEMBER FUNCTION compara_quantidade_vacina RETURN NUMBER IS
+
+    BEGIN
+        IF validade < SYSDATE() THEN
+            RETURN 0;
+        ELSE 
+            RETURN quantidade;
+        END IF;
+    END compara_quantidade_vacina;
+END;
 
 /
 
@@ -139,9 +152,25 @@ CREATE OR REPLACE TYPE tp_campanha_de_vacinacao AS OBJECT(
     nome  varchar(100),
     entidade varchar(100),
     dt_inicio DATE,
-    dt_termino DATE
+    dt_termino DATE,
+    CONSTRUCTOR FUNCTION tp_campanha_de_vacinacao
+    (SELF IN OUT NOCOPY tp_campanha_de_vacinacao, iid NUMBER, inome VARCHAR2, ientidade VARCHAR2, idt DATE)
+    RETURN SELF AS RESULT
 );
-
+/
+CREATE OR REPLACE TYPE BODY tp_campanha_de_vacinacao AS
+    CONSTRUCTOR FUNCTION tp_campanha_de_vacinacao
+    (SELF IN OUT NOCOPY tp_campanha_de_vacinacao, iid NUMBER, inome VARCHAR2, ientidade VARCHAR2, idt DATE)
+    RETURN SELF AS RESULT IS
+    BEGIN
+        SELF.id := iid;
+        SELF.nome := inome;
+        SELF.entidade := ientidade;
+        SELF.dt_inicio := idt;
+        SELF.dt_termino := null;
+        RETURN;
+    END;
+END;
 /
 
 --agendamento

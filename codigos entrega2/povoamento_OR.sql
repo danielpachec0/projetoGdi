@@ -102,9 +102,29 @@ INSERT INTO tb_vacina VALUES(
     tp_vacina(
         '1',
         (SELECT REF(P) FROM tb_ponto_de_vacinacao P WHERE P.CNPJ ='1001'),
-        to_date('09/11/2009', 'dd/mm/yy'),
+        to_date('09/11/2022', 'dd/mm/yy'),
         'coronavac',
         10
+    )
+);
+
+INSERT INTO tb_vacina VALUES(
+    tp_vacina(
+        '2',
+        (SELECT REF(P) FROM tb_ponto_de_vacinacao P WHERE P.CNPJ ='1001'),
+        to_date('09/11/202', 'dd/mm/yy'),
+        'Oxford',
+        9
+    )
+);
+
+INSERT INTO tb_vacina VALUES(
+    tp_vacina(
+        '3',
+        (SELECT REF(P) FROM tb_ponto_de_vacinacao P WHERE P.CNPJ ='1001'),
+        to_date('09/11/2009', 'dd/mm/yy'),
+        'jansen',
+        15
     )
 );
 /
