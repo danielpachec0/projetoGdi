@@ -75,7 +75,7 @@ CREATE OR REPLACE TYPE tp_pessoa AS OBJECT(
     sexo char(1),
     endereco tp_endereco,
     telefones tp_arr_telefone
-)NOT FINAL;
+)NOT FINAL NOT INSTANTIABLE;
 
 /
 
