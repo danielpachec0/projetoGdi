@@ -47,6 +47,7 @@ CREATE OR REPLACE TYPE tp_endereco AS OBJECT(
 );
 
 /
+
 --plano de saude
 CREATE OR REPLACE TYPE tp_plano_de_saude AS OBJECT(
     CNS VARCHAR(100),
@@ -89,9 +90,9 @@ CREATE OR REPLACE TYPE tp_ponto_de_vacinacao AS OBJECT(
 
 --funcionario
 CREATE OR REPLACE TYPE tp_funcionario UNDER tp_pessoa(
-    salario NUMBER
-    --adcionar referencia ponto
-    --adcionar ref supervisor
+    salario NUMBER,
+    ponto REF tp_ponto_de_vacinacao,--adcionar referencia ponto
+    supervisor REF tp_funcionario--adcionar ref supervisor
 );
 
 /
@@ -107,8 +108,8 @@ CREATE OR REPLACE TYPE tp_paciente UNDER tp_pessoa(
 --vacina
 CREATE OR REPLACE TYPE tp_vacina AS OBJECT(
     lote VARCHAR(100),
-    -- ponto REF tp_ponto_de_vacinacao,
-    validade DATE
+    ponto REF tp_ponto_de_vacinacao,
+    validade DATE,
     nome VARCHAR(100),
     quantidade NUMBER
 );
@@ -129,10 +130,11 @@ CREATE OR REPLACE TYPE tp_campanha_de_vacinacao AS OBJECT(
 --agendamento
 CREATE OR REPLACE TYPE tp_agendamento AS OBJECT(
     id INTEGER,
-    --paciente REF tp_paciente,
-    --funcionario REF tp_funcionario,
+    paciente REF tp_paciente,--paciente REF tp_paciente
+    funcionario REF tp_funcionario,--funcionario REF tp_funcionario
     --ponto REF tp_ponto_de_vacinacao, --checar se precisa
-    --vacina REF vacina,
+    vacina REF tp_vacina,--vacina REF vacina,
+    campanha REF tp_campanha_de_vacinacao,
     dt_agendamento TIMESTAMP,
     status CHAR(1)
 );
@@ -140,9 +142,8 @@ CREATE OR REPLACE TYPE tp_agendamento AS OBJECT(
 /
 
 --agendamento com campanha
-CREATE OR REPLACE TYPE tp_agendamento_com_campanha, AS OBJECT(
-    
-);
+-- CREATE OR REPLACE TYPE tp_agendamento_com_campanha, AS OBJECT(  
+-- );
 
 /
 
@@ -157,7 +158,9 @@ CREATE TABLE tb_ponto_de_vacinacao OF tp_ponto_de_vacinacao(
 
 --Funcionario
 CREATE TABLE tb_funcionario OF tp_funcionario(
-    CPF PRIMARY KEY
+    CPF PRIMARY KEY,
+    --supervisor SCOPE IS tp_funcionario, (nao percisa?)
+    ponto SCOPE IS tb_ponto_de_vacinacao
 );
 
 /
@@ -177,12 +180,17 @@ CREATE TABLE tb_campanha_de_vacinacao OF tp_campanha_de_vacinacao(
 
 --Vacina
 CREATE TABLE tb_vacina OF tp_vacina(
-    lote PRIMARY KEY
+    lote PRIMARY KEY,
+    ponto SCOPE IS tb_ponto_de_vacinacao
 );
 
 /
 
 --agendamento
 CREATE TABLE tb_agendamento OF tp_agendamento(
-    id PRIMARY KEY
+    id PRIMARY KEY,
+    paciente SCOPE IS tb_paciente,
+    funcionario SCOPE IS tb_funcionario,
+    vacina SCOPE IS tb_vacina,
+    campanha SCOPE IS tb_campanha_de_vacinacao
 );
