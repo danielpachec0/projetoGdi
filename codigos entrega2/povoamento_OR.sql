@@ -131,3 +131,25 @@ SELECT V.lote, DEREF(V.ponto).CNPJ FROM tb_vacina V;
 --SELECT * FROM tb_agendamento; incosistente por referencia
 SELECT A.id, DEREF(A.paciente).nome, DEREF(A.funcionario).nome, DEREF(A.vacina).lote FROM tb_agendamento A;
 SELECT A.id, DEREF(DEREF(A.vacina).ponto).cnpj ,DEREF(A.paciente).nome, DEREF(A.funcionario).nome, DEREF(A.vacina).lote FROM tb_agendamento A;
+
+--Povoamento Funcionarios ---------------------------------------------------
+-- INSERT INTO tb_funcionario VALUES(
+--     tp_funcionario(
+--         '7',
+--         'teste',
+--         'gasm@mail.com',
+--         to_date('01/2/2001', 'dd/mm/yy'),
+--         'M',
+--         tp_endereco(
+--             '232',
+--             'rua aurora',
+--             'Casa forte',
+--             'Recife',
+--             'PE',
+--             1
+--         ),
+--         tp_arr_telefone(tp_telefone('99999998')),
+--         20000,
+--         (SELECT REF(P) FROM tb_ponto_de_vacinacao P WHERE P.CNPJ ='1001')
+--     )
+-- );

@@ -75,6 +75,7 @@ CREATE OR REPLACE TYPE tp_pessoa AS OBJECT(
     sexo char(1),
     endereco tp_endereco,
     telefones tp_arr_telefone
+
 )NOT FINAL NOT INSTANTIABLE;
 
 /
@@ -92,8 +93,24 @@ CREATE OR REPLACE TYPE tp_ponto_de_vacinacao AS OBJECT(
 CREATE OR REPLACE TYPE tp_funcionario UNDER tp_pessoa(
     salario NUMBER,
     ponto REF tp_ponto_de_vacinacao,--adcionar referencia ponto
-    supervisor REF tp_funcionario--adcionar ref supervisor
+    supervisor REF tp_funcionario,--adcionar ref supervisor
+    MEMBER PROCEDURE novo_salario(SELF IN OUT NOCOPY tp_funcionario, input NUMBER),
+    MEMBER FUNCTION salario_anual RETURN NUMBER
 );
+
+/
+
+CREATE OR REPLACE TYPE BODY tp_funcionario AS
+    MEMBER PROCEDURE novo_salario(SELF IN OUT NOCOPY tp_funcionario, input NUMBER) IS
+    BEGIN  
+        self.salario := input;
+    END;
+    MEMBER FUNCTION salario_anual RETURN NUMBER IS
+    BEGIN
+        RETURN salario * 12;
+    END;
+END;
+
 
 /
 
