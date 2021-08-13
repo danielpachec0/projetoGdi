@@ -16,13 +16,19 @@ DROP TYPE tp_agendamento
 /
 DROP TYPE tp_vacina
 /
+DROP TYPE tp_nt_vacina
+/
+DROP TYPE tp_ponto_de_vacinacao
+/
+DROP TYPE tp_nt_trabalha
+/
+DROP TYPE tp_trabalha
+/
 DROP TYPE tp_funcionario
 /
 DROP TYPE tp_paciente
 /
 DROP TYPE tp_pessoa
-/
-DROP TYPE tp_ponto_de_vacinacao
 /
 DROP TYPE tp_arr_telefone
 /
@@ -48,7 +54,7 @@ CREATE OR REPLACE TYPE tp_endereco AS OBJECT(
 
 /
 
---plano de saude
+--plano de saude-----------------------------------------------------
 CREATE OR REPLACE TYPE tp_plano_de_saude AS OBJECT(
     CNS VARCHAR(100),
     seguradora VARCHAR(100),
@@ -57,45 +63,37 @@ CREATE OR REPLACE TYPE tp_plano_de_saude AS OBJECT(
 
 /
 
---telefone
+--telefone----------------------------------------------------------
 CREATE OR REPLACE TYPE tp_telefone AS OBJECT(
     numero VARCHAR(100)
 );
-
 /
 CREATE OR REPLACE TYPE tp_arr_telefone AS VARRAY(5) OF tp_telefone;
 /
 
---pessoa
+--pessoa-------------------------------------------------------------
 CREATE OR REPLACE TYPE tp_pessoa AS OBJECT(
     CPF VARCHAR(100),
     nome VARCHAR(100),
-    email VARCHAR(100),
+    --email VARCHAR(100),
     dt_nascimento DATE,
     sexo char(1),
     endereco tp_endereco,
-    telefones tp_arr_telefone
-
+    telefones tp_arr_telefone,
+    MEMBER PROCEDURE print_info
 )NOT FINAL NOT INSTANTIABLE;
 
 /
 
---ponto de vacinacao
-CREATE OR REPLACE TYPE tp_ponto_de_vacinacao AS OBJECT(
-    CNPJ VARCHAR(100),
-    endereco tp_endereco,
-    telefones tp_arr_telefone
-);
 
-/
 
---funcionario
+--funcionario-------------------------------------------------------------
 CREATE OR REPLACE TYPE tp_funcionario UNDER tp_pessoa(
     salario NUMBER,
-    ponto REF tp_ponto_de_vacinacao,--adcionar referencia ponto
-    supervisor REF tp_funcionario,--adcionar ref supervisor
+    supervisor REF tp_funcionario,
     MEMBER PROCEDURE novo_salario(SELF IN OUT NOCOPY tp_funcionario, input NUMBER),
-    MEMBER FUNCTION salario_anual RETURN NUMBER
+    MEMBER FUNCTION salario_anual RETURN NUMBER,
+    OVERRIDING MEMBER PROCEDURE print_info
 );
 
 /
@@ -109,26 +107,54 @@ CREATE OR REPLACE TYPE BODY tp_funcionario AS
     BEGIN
         RETURN salario * 12;
     END;
+    OVERRIDING MEMBER PROCEDURE print_info IS
+    BEGIN
+        DBMS_OUTPUT.Put_line(nome);
+        DBMS_OUTPUT.Put_line(cpf);
+        DBMS_OUTPUT.Put_line(salario);
+    END;
 END;
 
 
 /
 
---paciente
+--paciente------------------------------------------------------------------
 CREATE OR REPLACE TYPE tp_paciente UNDER tp_pessoa(
     plano_de_saude tp_plano_de_saude,
-    dt_cadastro DATE
+    dt_cadastro DATE,
+    OVERRIDING MEMBER PROCEDURE print_info
 );
+/
+CREATE OR REPLACE TYPE BODY tp_paciente AS
+    OVERRIDING MEMBER PROCEDURE print_info IS
+    BEGIN
+        DBMS_OUTPUT.Put_line(nome);
+        DBMS_OUTPUT.Put_line(cpf);
+        DBMS_OUTPUT.Put_line(plano_de_saude.cns);
+    END;
+END;
+/
+-----------------------------------------------------------------------------------
+ALTER TYPE tp_pessoa ADD ATTRIBUTE (email VARCHAR2(100))CASCADE;
+-----
+/
+CREATE OR REPLACE TYPE tp_trabalha AS OBJECT(
+    funcionario REF tp_funcionario
+)NOT FINAL;--tirar?
 
 /
 
---vacina
+CREATE OR REPLACE TYPE tp_nt_trabalha AS TABLE OF tp_trabalha;
+
+/
+
+--vacina---------------------------------------------------------------------------
 CREATE OR REPLACE TYPE tp_vacina AS OBJECT(
-    lote VARCHAR(100),
-    ponto REF tp_ponto_de_vacinacao,
+    lote NUMBER,
     validade DATE,
     nome VARCHAR(100),
     quantidade NUMBER,
+    --ponto REF tp_ponto_de_vacinacao
     MAP MEMBER FUNCTION compara_quantidade_vacina return NUMBER
 );
 /
@@ -143,7 +169,18 @@ CREATE OR REPLACE TYPE BODY tp_vacina AS
         END IF;
     END compara_quantidade_vacina;
 END;
+/
 
+--ponto de vacinacao
+CREATE OR REPLACE TYPE tp_ponto_de_vacinacao AS OBJECT(
+    CNPJ VARCHAR(100),
+    endereco tp_endereco,
+    telefones tp_arr_telefone,
+    funcionarios tp_nt_trabalha
+);
+
+/
+ALTER TYPE tp_vacina ADD ATTRIBUTE (ponto REF tp_ponto_de_vacinacao)CASCADE;
 /
 
 --campanha de vacinacao
@@ -176,11 +213,25 @@ END;
 --agendamento
 CREATE OR REPLACE TYPE tp_agendamento AS OBJECT(
     id INTEGER,
-    paciente REF tp_paciente,--paciente REF tp_paciente
-    funcionario REF tp_funcionario,--funcionario REF tp_funcionario
-    --ponto REF tp_ponto_de_vacinacao, --checar se precisa
-    vacina REF tp_vacina,--vacina REF vacina,
+    paciente REF tp_paciente,
+    funcionario REF tp_funcionario,
+    vacina REF tp_vacina,
     campanha REF tp_campanha_de_vacinacao,
     dt_agendamento TIMESTAMP,
-    status CHAR(1)
+    status CHAR(1),
+    ORDER MEMBER FUNCTION aux(SELF IN OUT NOCOPY tp_agendamento, x tp_agendamento) RETURN DECIMAL
 );
+/
+CREATE OR REPLACE TYPE BODY tp_agendamento AS
+    ORDER MEMBER FUNCTION aux(SELF IN OUT NOCOPY tp_agendamento, x tp_agendamento) RETURN NUMBER IS
+    BEGIN
+        IF SELF.dt_agendamento < x.dt_agendamento THEN
+            RETURN -1;               
+        ELSIF SELF.dt_agendamento > x.dt_agendamento THEN 
+            RETURN 1;                
+        ELSE 
+            RETURN 0;
+        END IF;
+    END;
+END;/
+
