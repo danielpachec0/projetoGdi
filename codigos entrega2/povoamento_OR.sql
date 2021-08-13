@@ -359,7 +359,7 @@ INSERT INTO tb_agendamento VALUES(
         (SELECT REF(P) FROM tb_paciente P WHERE P.CPF ='10'),
         (SELECT REF(F) FROM tb_funcionario F WHERE F.CPF ='2'),
         (SELECT REF(V) FROM tb_vacina V WHERE V.lote ='1'),
-        (SELECT REF(C) FROM tb_campanha_de_vacinacao C WHERE V.nome = 2),
+        (SELECT REF(C) FROM tb_campanha_de_vacinacao C WHERE C.id = 2),
         to_date('09/11/2009', 'dd/mm/yy'),
         '0' 
     )

@@ -25,7 +25,7 @@ CREATE TABLE tb_ponto_de_vacinacao OF tp_ponto_de_vacinacao(
 CREATE TABLE tb_funcionario OF tp_funcionario(
     CPF PRIMARY KEY,
     salario NOT NULL
-    --supervisor SCOPE IS tp_funcionario, (nao percisa?)
+    --supervisor WITH ROWID REFERENCES tp_funcionario --(nao percisa?)
 );
 
 /
@@ -54,7 +54,7 @@ CREATE TABLE tb_vacina OF tp_vacina(
     validade NOT NULL,
     nome NOT NULL,
     quantidade NOT NULL,
-    ponto SCOPE IS tb_ponto_de_vacinacao
+    ponto WITH ROWID REFERENCES tb_ponto_de_vacinacao
 );
 
 /
@@ -64,8 +64,8 @@ CREATE TABLE tb_agendamento OF tp_agendamento(
     id PRIMARY KEY,
     dt_agendamento NOT NULL,
     status NOT NULL,
-    paciente SCOPE IS tb_paciente NOT NULL,
-    funcionario SCOPE IS tb_funcionario NOT NULL,
-    vacina SCOPE IS tb_vacina NOT NULL,
-    campanha SCOPE IS tb_campanha_de_vacinacao
+    paciente WITH ROWID REFERENCES tb_paciente NOT NULL,
+    funcionario WITH ROWID REFERENCES tb_funcionario NOT NULL,
+    vacina WITH ROWID REFERENCES tb_vacina NOT NULL,
+    campanha WITH ROWID REFERENCES tb_campanha_de_vacinacao
 );
