@@ -80,12 +80,19 @@ CREATE OR REPLACE TYPE tp_pessoa AS OBJECT(
     sexo char(1),
     endereco tp_endereco,
     telefones tp_arr_telefone,
-    MEMBER PROCEDURE print_info
+    MEMBER PROCEDURE print_info,
+    FINAL MAP MEMBER FUNCTION compara_quantidade_vacina return NUMBER
 )NOT FINAL NOT INSTANTIABLE;
 
 /
 
-
+CREATE OR REPLACE TYPE BODY tp_funcionario AS
+FINAL MAP MEMBER FUNCTION compara_quantidade_vacina return NUMBER IS
+    BEGIN
+        RETURN COUNT_ELEMENTS(telefones)
+    END;
+END;
+/
 
 --funcionario-------------------------------------------------------------
 CREATE OR REPLACE TYPE tp_funcionario UNDER tp_pessoa(
@@ -93,7 +100,7 @@ CREATE OR REPLACE TYPE tp_funcionario UNDER tp_pessoa(
     supervisor REF tp_funcionario,
     MEMBER PROCEDURE novo_salario(SELF IN OUT NOCOPY tp_funcionario, input NUMBER),
     MEMBER FUNCTION salario_anual RETURN NUMBER,
-    OVERRIDING MEMBER PROCEDURE print_info
+    OVERRIDING MEMBER PROCEDURE print_info 
 );
 
 /
