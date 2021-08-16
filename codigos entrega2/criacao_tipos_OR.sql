@@ -75,7 +75,6 @@ CREATE OR REPLACE TYPE tp_arr_telefone AS VARRAY(5) OF tp_telefone;
 CREATE OR REPLACE TYPE tp_pessoa AS OBJECT(
     CPF VARCHAR(100),
     nome VARCHAR(100),
-    --email VARCHAR(100),
     dt_nascimento DATE,
     sexo char(1),
     endereco tp_endereco,
@@ -86,7 +85,7 @@ CREATE OR REPLACE TYPE tp_pessoa AS OBJECT(
 
 /
 
-CREATE OR REPLACE TYPE BODY tp_funcionario AS
+CREATE OR REPLACE TYPE BODY tp_pessoa AS
 FINAL MAP MEMBER FUNCTION Numero_de_telefones_registrados return NUMBER IS
     BEGIN
         RETURN COUNT_ELEMENTS(telefones)
