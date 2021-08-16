@@ -78,7 +78,7 @@ INSERT INTO tb_funcionario VALUES(
             'PE',
             1
         ),
-        tp_arr_telefone(tp_telefone('99999999')),
+        tp_arr_telefone(tp_telefone('99999999'), tp_telefone('99999998'), tp_telefone('99999997')),
         'cgcm@mail.com',
         10000,
         (SELECT REF(P) FROM tb_funcionario P WHERE P.CPF ='2')
@@ -99,7 +99,7 @@ INSERT INTO tb_funcionario VALUES(
             'PE',
             1
         ),
-        tp_arr_telefone(tp_telefone('99999998')),
+        tp_arr_telefone(tp_telefone('99999998'), tp_telefone('99999999')),
         'alcaf@mail.com',
         20000,
         null
