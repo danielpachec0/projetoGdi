@@ -81,13 +81,13 @@ CREATE OR REPLACE TYPE tp_pessoa AS OBJECT(
     endereco tp_endereco,
     telefones tp_arr_telefone,
     MEMBER PROCEDURE print_info,
-    FINAL MAP MEMBER FUNCTION compara_quantidade_vacina return NUMBER
+    FINAL MAP MEMBER FUNCTION Numero_de_telefones_registrados return NUMBER
 )NOT FINAL NOT INSTANTIABLE;
 
 /
 
 CREATE OR REPLACE TYPE BODY tp_funcionario AS
-FINAL MAP MEMBER FUNCTION compara_quantidade_vacina return NUMBER IS
+FINAL MAP MEMBER FUNCTION Numero_de_telefones_registrados return NUMBER IS
     BEGIN
         RETURN COUNT_ELEMENTS(telefones)
     END;
